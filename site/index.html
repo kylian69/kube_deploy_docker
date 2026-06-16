@@ -1,15 +1,808 @@
-<!-- site/index.html -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mon Site</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Projet Master — DevSecOps Kubernetes 2026</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@300;400;500;600&family=Syne:wght@700;800&display=swap');
+
+  :root {
+    --bg:        #0b0d12;
+    --surface:   #111420;
+    --surface2:  #161924;
+    --border:    #1c2035;
+    --accent:    #6272f5;
+    --accent2:   #00e5c3;
+    --danger:    #ff4f6e;
+    --warn:      #ffb547;
+    --purple:    #b47fff;
+    --text:      #c2c9e0;
+    --text-dim:  #4e566e;
+    --text-head: #edf0fb;
+    --mono:      'JetBrains Mono', monospace;
+    --sans:      'Inter', sans-serif;
+    --display:   'Syne', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.75;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 4rem 0 3.5rem;
+    position: relative; overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute; top: -80px; left: 30%;
+    width: 900px; height: 500px;
+    background: radial-gradient(ellipse, rgba(98,114,245,0.10) 0%, transparent 65%);
+    pointer-events: none;
+  }
+  .container { max-width: 880px; margin: 0 auto; padding: 0 2rem; }
+
+  .badge-row { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 1.75rem; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    font-family: var(--mono); font-size: 0.67rem; font-weight: 600;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 0.28rem 0.7rem; border-radius: 2px;
+  }
+  .badge-blue  { color: var(--accent2); border: 1px solid rgba(0,229,195,.22); background: rgba(0,229,195,.05); }
+  .badge-purple{ color: var(--purple);  border: 1px solid rgba(180,127,255,.22); background: rgba(180,127,255,.05); }
+  .badge-red   { color: var(--danger);  border: 1px solid rgba(255,79,110,.22); background: rgba(255,79,110,.05); }
+  .badge::before { content: '●'; font-size: 0.45rem; }
+
+  h1 {
+    font-family: var(--display); font-size: clamp(2rem, 5vw, 3.3rem);
+    font-weight: 800; color: var(--text-head); line-height: 1.08; margin-bottom: 1rem;
+  }
+  h1 span.c1 { color: var(--accent); }
+  h1 span.c2 { color: var(--accent2); }
+
+  .subtitle {
+    font-size: 0.97rem; color: var(--text-dim); max-width: 600px;
+    border-left: 2px solid var(--accent); padding-left: 1rem; margin-top: 1.25rem;
+    line-height: 1.65;
+  }
+
+  .meta-bar {
+    display: flex; flex-wrap: wrap; gap: 2rem; margin-top: 2rem;
+    font-family: var(--mono); font-size: 0.75rem; color: var(--text-dim);
+  }
+  .meta-bar span strong { color: var(--text); }
+
+  /* ─── SECTION TITLES ─── */
+  .sl { font-family: var(--mono); font-size: 0.65rem; font-weight: 600;
+        letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent);
+        margin-bottom: 0.5rem; }
+  h2 {
+    font-family: var(--display); font-size: 1.5rem; font-weight: 700;
+    color: var(--text-head); margin-bottom: 1.5rem;
+  }
+
+  /* ─── DIVIDER ─── */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 3rem 0; }
+
+  /* ─── CARDS GRID ─── */
+  .card-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(245px, 1fr));
+    gap: 1px; background: var(--border); border: 1px solid var(--border);
+    margin-bottom: 2.5rem;
+  }
+  .card { background: var(--surface); padding: 1.3rem 1.5rem; }
+  .card-icon { font-size: 1.2rem; margin-bottom: 0.55rem; }
+  .card-title { font-family: var(--mono); font-size: 0.78rem; font-weight: 600;
+                color: var(--text-head); margin-bottom: 0.35rem; }
+  .card-desc  { font-size: 0.8rem; color: var(--text-dim); line-height: 1.55; }
+  .card-new   { display: inline-block; font-family: var(--mono); font-size: 0.6rem;
+                color: var(--accent2); border: 1px solid rgba(0,229,195,.3);
+                padding: 0.1rem 0.4rem; border-radius: 2px; margin-left: 0.4rem;
+                vertical-align: middle; }
+  .card-upd   { display: inline-block; font-family: var(--mono); font-size: 0.6rem;
+                color: var(--warn); border: 1px solid rgba(255,181,71,.3);
+                padding: 0.1rem 0.4rem; border-radius: 2px; margin-left: 0.4rem;
+                vertical-align: middle; }
+
+  /* ─── DELTA BOX ─── */
+  .delta-box {
+    background: rgba(98,114,245,0.06); border: 1px solid rgba(98,114,245,.2);
+    border-left: 3px solid var(--accent); padding: 1.25rem 1.5rem;
+    margin-bottom: 2.5rem; font-size: 0.86rem;
+  }
+  .delta-box strong { color: var(--text-head); }
+  .delta-box ul { list-style: none; padding: 0; margin-top: 0.6rem; }
+  .delta-box ul li { padding: 0.25rem 0 0.25rem 1.3rem; position: relative; color: var(--text); }
+  .delta-box ul li::before { content: '△'; position: absolute; left: 0;
+    color: var(--accent); font-size: 0.65rem; top: 0.5rem; }
+
+  /* ─── ARCH ─── */
+  .arch-diagram {
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 1.75rem; margin-bottom: 2.5rem; font-family: var(--mono);
+    font-size: 0.76rem; color: var(--text-dim); line-height: 1.95;
+    white-space: pre; overflow-x: auto;
+  }
+  .ah { color: var(--accent2); }
+  .ah2 { color: var(--accent); }
+  .ah3 { color: var(--warn); }
+  .ah4 { color: var(--purple); }
+
+  /* ─── PHASES ─── */
+  .phases { display: flex; flex-direction: column; gap: 1px; margin-bottom: 3rem; }
+  .phase {
+    background: var(--surface); border: 1px solid var(--border);
+    border-left: 3px solid var(--accent); padding: 1.6rem 1.8rem;
+  }
+  .phase.sec  { border-left-color: var(--danger); }
+  .phase.obs  { border-left-color: var(--accent2); }
+  .phase.auto { border-left-color: var(--warn); }
+  .phase.plat { border-left-color: var(--purple); }
+  .phase.doc  { border-left-color: #5eead4; }
+
+  .phase-num {
+    font-family: var(--mono); font-size: 0.63rem; font-weight: 600;
+    color: var(--text-dim); letter-spacing: 0.1em; margin-bottom: 0.3rem;
+  }
+  .phase-title {
+    font-family: var(--display); font-size: 1.13rem; font-weight: 700;
+    color: var(--text-head); margin-bottom: 0.75rem;
+  }
+  .phase-body { font-size: 0.87rem; }
+
+  ul.task-list { list-style: none; padding: 0; margin-top: 0.75rem; }
+  ul.task-list li {
+    padding: 0.38rem 0 0.38rem 1.5rem; position: relative;
+    font-size: 0.85rem; color: var(--text);
+    border-bottom: 1px solid var(--border);
+  }
+  ul.task-list li:last-child { border-bottom: none; }
+  ul.task-list li::before {
+    content: '→'; position: absolute; left: 0;
+    color: var(--accent); font-family: var(--mono); font-size: 0.72rem; top: 0.5rem;
+  }
+  .phase.sec  ul.task-list li::before { color: var(--danger); }
+  .phase.obs  ul.task-list li::before { color: var(--accent2); }
+  .phase.auto ul.task-list li::before { color: var(--warn); }
+  .phase.plat ul.task-list li::before { color: var(--purple); }
+  .phase.doc  ul.task-list li::before { color: #5eead4; }
+
+  .tag-new { display: inline-block; font-family: var(--mono); font-size: 0.58rem;
+             color: var(--accent2); border: 1px solid rgba(0,229,195,.3);
+             padding: 0.08rem 0.35rem; border-radius: 2px; margin-left: 0.4rem; }
+  .tag-upd { display: inline-block; font-family: var(--mono); font-size: 0.58rem;
+             color: var(--warn); border: 1px solid rgba(255,181,71,.3);
+             padding: 0.08rem 0.35rem; border-radius: 2px; margin-left: 0.4rem; }
+
+  /* ─── DELIVERABLES ─── */
+  .del-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1px; background: var(--border); border: 1px solid var(--border);
+    margin-bottom: 2.5rem;
+  }
+  .del-item { background: var(--surface); padding: 1.1rem 1.2rem; }
+  .del-tag { font-family: var(--mono); font-size: 0.63rem; color: var(--accent2);
+             text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.3rem; }
+  .del-title { font-size: 0.86rem; font-weight: 500; color: var(--text-head); }
+
+  /* ─── EVAL TABLE ─── */
+  .eval-table { width: 100%; border-collapse: collapse; font-size: 0.84rem; margin-top: 1rem; }
+  .eval-table th {
+    background: var(--surface2); color: var(--text-dim); font-family: var(--mono);
+    font-size: 0.68rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em;
+    padding: 0.65rem 1rem; text-align: left;
+  }
+  .eval-table td { padding: 0.65rem 1rem; border-bottom: 1px solid var(--border); }
+  .eval-table tr:last-child td { border-bottom: none; }
+  .pts { font-family: var(--mono); font-weight: 600; color: var(--accent2); white-space: nowrap; }
+
+  /* ─── BONUS ─── */
+  .bonus-block {
+    background: rgba(180,127,255,0.05); border: 1px solid rgba(180,127,255,0.2);
+    padding: 1.5rem 1.75rem; margin-bottom: 2.5rem;
+  }
+  .bonus-block ul { list-style: none; padding: 0; margin-top: 0.75rem; }
+  .bonus-block ul li { padding: 0.3rem 0 0.3rem 1.4rem; position: relative; font-size: 0.86rem; }
+  .bonus-block ul li::before { content: '⬡'; position: absolute; left: 0;
+    color: var(--purple); font-size: 0.65rem; top: 0.5rem; }
+
+  /* ─── RULES ─── */
+  .rules { display: flex; flex-direction: column; gap: 1px; background: var(--border);
+           border: 1px solid var(--border); margin-bottom: 2.5rem; }
+  .rule { background: var(--surface); padding: 1rem 1.4rem; display: flex; gap: 1rem; align-items: flex-start; }
+  .rule-icon { font-size: 1rem; flex-shrink: 0; margin-top: 0.15rem; }
+  .rule-title { font-family: var(--mono); font-size: 0.78rem; font-weight: 600;
+                color: var(--text-head); margin-bottom: 0.2rem; }
+  .rule-desc  { font-size: 0.8rem; color: var(--text-dim); }
+
+  /* ─── FOOTER ─── */
+  footer {
+    border-top: 1px solid var(--border); padding: 2rem 0;
+    font-family: var(--mono); font-size: 0.7rem; color: var(--text-dim); text-align: center;
+  }
+
+  main { padding: 3rem 0 5rem; }
+
+  @media (max-width: 600px) {
+    .card-grid { grid-template-columns: 1fr; }
+    .del-grid  { grid-template-columns: 1fr; }
+  }
+</style>
 </head>
 <body>
-  <h1>Bienvenue sur mon site 🚀 v4</h1>
-  <p>Déployé automatiquement via GitHub Actions</p>
-  <script src="script.js"></script>
+
+<header>
+  <div class="container">
+    <div class="badge-row">
+      <span class="badge badge-blue">Projet de fin d'études — Master 2</span>
+      <span class="badge badge-purple">Kubernetes 1.35–1.36 · Juin 2026</span>
+      <span class="badge badge-red">DevSecOps · Platform Engineering</span>
+      <span class="badge badge-blue">On-prem HA · Hybrid Cloud</span>
+    </div>
+    <h1>Plateforme <span class="c1">GitOps</span> Zero-Trust<br>en Production sur <span class="c2">Kubernetes</span></h1>
+    <p class="subtitle">
+      Concevoir, déployer et opérer une plateforme cloud-native complète avec les outils et pratiques qui définissent le métier en 2026 — supply chain SLSA, sidecar-less mesh, observabilité OTEL unifiée, eBPF, et IDP.
+    </p>
+    <div class="meta-bar">
+      <span><strong>Durée :</strong> 8 semaines</span>
+      <span><strong>Équipe :</strong> 3 à 4 personnes</span>
+      <span><strong>Kubernetes :</strong> v1.35 / v1.36</span>
+      <span><strong>100 points</strong></span>
+    </div>
+  </div>
+</header>
+
+<main>
+<div class="container">
+
+  <!-- CONTEXTE -->
+  <div class="sl">Contexte</div>
+  <h2>Mission</h2>
+  <p>Vous êtes une équipe <strong style="color:var(--text-head)">Platform Engineering</strong> mandatée par la scale-up fictive <strong style="color:var(--text-head)">NovaPay</strong> pour construire leur infrastructure de production from scratch. NovaPay traite des paiements en ligne : disponibilité, sécurité de la supply chain et auditabilité sont des contraintes réelles.</p>
+  <p style="margin-top:0.75rem">L'objectif est de produire une plateforme <em>complète, documentée et opérable</em>, comme si elle allait réellement accueillir du trafic. Chaque choix doit être justifié par un ADR ; chaque composant de sécurité doit être prouvé fonctionnel par un test ou une démo live.</p>
+
+  <!-- DELTA -->
+  <div class="delta-box" style="margin-top:2rem">
+    <strong>⚡ Ce qui a changé depuis 2025 — pourquoi cet énoncé est différent</strong>
+    <ul>
+      <li><strong>Kubernetes 1.35/1.36 (Haru)</strong> est la version stable — les features GA de 2024-2025 (sidecar containers, in-place resize, ValidatingAdmissionPolicy) sont maintenant attendues</li>
+      <li><strong>Istio Ambient Mesh</strong> est GA depuis Istio 1.22 — le mode sidecar n'est plus le choix par défaut en 2026, le projet impose d'évaluer et justifier le choix</li>
+      <li><strong>Cilium + Gateway API</strong> remplace Nginx Ingress : la Gateway API Kubernetes est le standard réseau désormais, Ingress est legacy</li>
+      <li><strong>Grafana Alloy</strong> (successeur de Grafana Agent) remplace Promtail + Agent — pipeline OTEL unifié métriques/logs/traces/profiling en un seul collector</li>
+      <li><strong>OpenTelemetry</strong> est diplômé CNCF et à 95 %+ d'adoption — l'instrumentation OTel est imposée, pas optionnelle</li>
+      <li><strong>SLSA v1.1</strong> est la référence supply chain — Sigstore/Cosign + attestations de provenance font partie du minimum attendu en industrie réglementée</li>
+      <li><strong>Kubescape 4.0</strong> remplace kube-bench comme outil de scanning de posture (runtime + AI agent scanning inclus)</li>
+      <li><strong>Backstage IDP</strong> : le Platform Engineering implique maintenant un Internal Developer Portal — au moins un template de service catalogué</li>
+      <li><strong>EPSS scoring</strong> : prioriser les CVE par probabilité d'exploitation réelle, pas juste par score CVSS</li>
+    </ul>
+  </div>
+
+  <hr class="divider">
+
+  <!-- INFRA -->
+  <div class="sl">Infrastructure disponible</div>
+  <h2>Le matériel & le découpage cible</h2>
+  <p>L'infrastructure n'est pas une abstraction : vous opérez sur du matériel réel, avec ses contraintes réelles. Le réalisme du projet vient de là.</p>
+
+  <div class="card-grid" style="margin-top:1.5rem">
+    <div class="card">
+      <div class="card-icon">🖥️</div>
+      <div class="card-title">2× Serveur compute</div>
+      <div class="card-desc">40 cores / 192 Go RAM chacun. Hôtes des workers et de la majorité de la charge. Virtualisés via Proxmox.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">💻</div>
+      <div class="card-title">2–3× PC légers</div>
+      <div class="card-desc">4 cores / 8 Go RAM. Rôle d'arbitre etcd (control-plane léger) et de générateurs de charge pour le chaos.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">☁️</div>
+      <div class="card-title">Budget cloud ciblé</div>
+      <div class="card-desc">DNS managé, object storage S3/GCS, et un cluster managé éphémère pour la démo de portabilité.</div>
+    </div>
+  </div>
+
+  <div class="delta-box">
+    <strong>⚖️ La contrainte qui dicte l'architecture : le quorum etcd</strong>
+    <p style="margin-top:0.5rem;font-size:0.85rem">etcd exige un nombre <strong>impair</strong> de membres (idéalement 3) pour maintenir le quorum. Avec seulement 2 gros serveurs, un control-plane sur chacun donnerait un cluster <em>moins</em> résilient qu'avec un seul (perte d'un membre = perte du quorum). La solution réaliste : un PC léger sert de <strong>3ᵉ control-plane / arbitre etcd</strong>. Un control-plane consomme peu — 4 cores / 8 Go suffisent. C'est un pattern de prod courant : nœuds de contrôle légers, workers costauds.</p>
+  </div>
+
+  <div class="arch-diagram"><span class="ah3">── DÉCOUPAGE PHYSIQUE (Proxmox sur les 2 gros serveurs) ──</span>
+
+<span class="ah2">Serveur A (40c / 192Go)</span>        <span class="ah2">Serveur B (40c / 192Go)</span>       <span class="ah4">PC léger 1 (4c/8Go)</span>
+  ├─ VM cp-prod-1 (4c/8)         ├─ VM cp-prod-2 (4c/8)        └─ cp-prod-3 (arbitre etcd)
+  ├─ VM worker-prod-1 (14c/56)   ├─ VM worker-prod-2 (14c/56)
+  ├─ VM worker-prod-3 (14c/56)   ├─ VM cp-staging (4c/8)       <span class="ah4">PC léger 2/3 (4c/8Go)</span>
+  └─ VM worker-staging (6c/24)   └─ VM worker-staging (6c/24)  └─ générateurs de charge
+                                                                   (k6 / Locust)
+
+<span class="ah">CLUSTER PROD</span>     : 3 control-plane (HA réel, répartis sur 3 machines physiques) + 3 workers costauds
+<span class="ah3">CLUSTER STAGING</span>  : 1 control-plane (non-HA assumé — décision d'archi documentée) + 2 workers
+<span class="ah4">CHARGE / CHAOS</span>   : PC légers en générateurs de trafic, hors cluster</div>
+
+  <div class="delta-box" style="border-left-color:var(--purple);background:rgba(180,127,255,0.05)">
+    <strong>🎯 Décision d'architecture : prod en HA, staging volontairement léger</strong>
+    <p style="margin-top:0.5rem;font-size:0.85rem">Le cluster prod est en HA strict. Le staging est en single control-plane — un choix assumé, pas une limite subie. De nombreuses entreprises ont un staging non-HA pour économiser. Savoir <strong>justifier et documenter ce trade-off dans un ADR</strong> est en soi une compétence d'architecte attendue à ce niveau.</p>
+  </div>
+
+  <h3 style="font-family:var(--mono);font-size:0.85rem;color:var(--text-head);margin:2rem 0 0.75rem;text-transform:uppercase;letter-spacing:0.05em">Usage ciblé du cloud — le réalisme hybride sans gaspillage</h3>
+  <p style="font-size:0.88rem">Le cloud n'est pas là pour dupliquer ce que le matériel fait déjà gratuitement, mais pour ce qui est <em>intrinsèquement externe</em> en entreprise :</p>
+  <div class="del-grid" style="margin-top:1rem">
+    <div class="del-item">
+      <div class="del-tag">DNS + TLS</div>
+      <div class="del-title">Domaine réel + DNS managé (Route53/Cloud DNS) → vrais certificats Let's Encrypt en DNS-01. Quelques €/mois.</div>
+    </div>
+    <div class="del-item">
+      <div class="del-tag">Object Storage</div>
+      <div class="del-title">Bucket S3/GCS comme backend Velero + Loki + Tempo. On ne stocke jamais ses backups sur le cluster sauvegardé.</div>
+    </div>
+    <div class="del-item">
+      <div class="del-tag">Cluster managé éphémère</div>
+      <div class="del-title">Petit EKS/GKE allumé quelques jours pour la démo de portabilité GitOps, puis détruit. Facturé à l'usage.</div>
+    </div>
+    <div class="del-item">
+      <div class="del-tag">FinOps</div>
+      <div class="del-title">Suivi du coût réel et arbitrage on-prem (capacité fixe payée) vs cloud (élastique facturé), documenté.</div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- STACK -->
+  <div class="sl">Technologies imposées</div>
+  <h2>Stack de référence 2026</h2>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon">⚓</div>
+      <div class="card-title">Kubernetes 1.35 / 1.36</div>
+      <div class="card-desc">Multi-nœuds (1 CP + 2+ workers). Features GA attendues : in-place pod resize, sidecar containers natifs, ValidatingAdmissionPolicy.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔁</div>
+      <div class="card-title">ArgoCD 3.x + Argo Rollouts</div>
+      <div class="card-desc">GitOps strict. ArgoCD 3.3 est la référence 2026. App of Apps pattern + ApplicationSets pour multi-env.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🏗️</div>
+      <div class="card-title">Terraform + Ansible</div>
+      <div class="card-desc">Provisioning VMs et bootstrap cluster entièrement automatisés. Checkov pour le scan statique IaC en CI.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🌐</div>
+      <div class="card-title">Cilium + Gateway API<span class="card-upd">UPD</span></div>
+      <div class="card-desc">CNI eBPF avec NetworkPolicy L7, mTLS intégré, et implémentation Gateway API. Ingress Controller = legacy.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🕸️</div>
+      <div class="card-title">Istio Ambient Mesh<span class="card-upd">UPD</span></div>
+      <div class="card-desc">Mode ambient (ztunnel + waypoint proxies) par défaut. Plus de sidecar Envoy par pod. GA depuis Istio 1.22.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔐</div>
+      <div class="card-title">HashiCorp Vault + ESO</div>
+      <div class="card-desc">Secrets dynamiques injectés via External Secrets Operator. Zéro secret en clair dans Git, sans exception.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🛡️</div>
+      <div class="card-title">Kyverno + Kubescape 4.0<span class="card-upd">UPD</span></div>
+      <div class="card-desc">Policy as Code (admission + mutation). Kubescape remplace kube-bench : posture runtime + CIS + NSA/CISA frameworks.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔬</div>
+      <div class="card-title">Trivy + Falco + SLSA v1.1</div>
+      <div class="card-desc">Scan images + runtime detection. Supply chain : Cosign + attestations de provenance SLSA Build L2 minimum.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">📡</div>
+      <div class="card-title">Grafana Alloy + OTEL<span class="card-new">NEW</span></div>
+      <div class="card-desc">Alloy remplace Promtail + Grafana Agent. Pipeline unifié OTLP : métriques, logs, traces et profiling dans un seul collector.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">📊</div>
+      <div class="card-title">Mimir + Loki + Tempo</div>
+      <div class="card-desc">Stack Grafana complète. Mimir pour les métriques à long terme (scalable Prometheus). Tempo pour le tracing distribué.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🏛️</div>
+      <div class="card-title">Backstage IDP<span class="card-new">NEW</span></div>
+      <div class="card-desc">Internal Developer Portal. Catalogue de services, templates, doc technique et score de maturité des composants.</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">📦</div>
+      <div class="card-title">Helm 3 + Kustomize</div>
+      <div class="card-desc">Packaging applicatif. Helm pour les composants infra (charts existants). Kustomize pour les overlays app par env.</div>
+    </div>
+  </div>
+
+  <!-- ARCHI -->
+  <div class="sl">Architecture cible</div>
+  <h2>Vue d'ensemble</h2>
+  <div class="arch-diagram"><span class="ah">[ Developer ]</span>  →  git push
+      │
+      ▼
+<span class="ah2">[ GitHub / GitLab ]</span>
+      │
+      ├── <span class="ah3">CI Pipeline (GitHub Actions checkout@v6)</span>
+      │         │
+      │    ┌────┴────────────────────────────────────┐
+      │    │  lint · test unitaires                  │
+      │    │  Checkov (IaC scan Terraform/Helm)       │
+      │    │  Trivy (image CVE + EPSS priorisation)  │
+      │    │  Cosign sign + SLSA provenance attestation│
+      │    │  SBOM CycloneDX (Syft)                  │
+      │    └────┬────────────────────────────────────┘
+      │         │ push image → OCI Registry (digest-tagged)
+      ▼         ▼
+<span class="ah">[ ArgoCD 3.x ]</span> ◄──── manifests repo (App of Apps)
+      │               Kyverno vérifie signature Cosign
+      │               à l'admission
+      ▼
+<span class="ah2">┌────────────────── Kubernetes 1.35/1.36 ─────────────────────────────────┐</span>
+│                                                                          │
+│  <span class="ah3">Cilium (eBPF)</span>  ──  <span class="ah">Gateway API (HTTPRoute / GRPCRoute)</span>              │
+│       │                  ↓                                               │
+│       │       <span class="ah4">Istio Ambient Mesh (ztunnel L4 + waypoint L7)</span>           │
+│       │       mTLS zero-trust entre tous les services                    │
+│       │                                                                  │
+│  ┌─────────────┐  ┌─────────────┐  ┌──────────────────┐                │
+│  │ api-gateway │  │ payment-svc │  │ notification-svc │                │
+│  └──────┬──────┘  └──────┬──────┘  └────────┬─────────┘                │
+│         └────────────────┼──────────────────┘                           │
+│                          ▼                                               │
+│              ┌─────────────────────┐                                    │
+│              │  PostgreSQL + Redis  │  (PVC + Velero backup)            │
+│              └─────────────────────┘                                    │
+│                                                                          │
+│  <span class="ah">[ Vault + ESO ]</span>   <span class="ah3">[ Kubescape 4.0 ]</span>   <span class="ah4">[ Kyverno policies ]</span>           │
+│  <span class="ah2">[ Grafana Alloy → Mimir / Loki / Tempo / Grafana ]</span>                    │
+│  <span class="ah4">[ Falco runtime ]</span>   <span class="ah3">[ Argo Rollouts canary ]</span>   <span class="ah">[ Backstage IDP ]</span>     │
+│                                                                          │
+└──────────────────────────────────────────────────────────────────────────┘</div>
+
+  <hr class="divider">
+
+  <!-- PHASES -->
+  <div class="sl">Phases du projet</div>
+  <h2>Travail demandé</h2>
+  <div class="phases">
+
+    <div class="phase">
+      <div class="phase-num">PHASE 01 — Semaines 1–2</div>
+      <div class="phase-title">Infrastructure as Code & Bootstrap Multi-Cluster</div>
+      <div class="phase-body">
+        Tout doit être reproductible : Terraform + Ansible doivent provisionner les VMs Proxmox et bootstrapper les <strong>deux clusters</strong> depuis zéro.
+        <ul class="task-list">
+          <li>Installer Proxmox sur les 2 gros serveurs, provisionner les VMs via le provider Terraform Proxmox <span class="tag-new">infra</span></li>
+          <li>Bootstrap du cluster <strong>prod en HA</strong> : 3 control-plane sur 3 machines physiques distinctes (dont 1 PC léger comme arbitre etcd) <span class="tag-new">infra</span></li>
+          <li>Bootstrap du cluster <strong>staging</strong> : single control-plane, choix non-HA assumé et documenté en ADR <span class="tag-new">infra</span></li>
+          <li>Kubernetes 1.35 via kubeadm, configuration HA avec endpoint API load-balancé (kube-vip ou HAProxy)</li>
+          <li>Installer Cilium comme CNI sur les deux clusters avec Gateway API activée — <strong>pas d'Ingress Controller</strong></li>
+          <li>Configurer Cilium LB-IPAM ou MetalLB pour les LoadBalancer Services on-prem</li>
+          <li>Déployer ArgoCD sur le cluster prod, l'enregistrer comme <strong>hub multi-cluster</strong> gérant prod ET staging <span class="tag-new">infra</span></li>
+          <li>Pattern App of Apps + ApplicationSets avec générateur de cluster (un même chart, deux destinations)</li>
+          <li>Mettre en place le DNS managé cloud + cert-manager DNS-01 pour de vrais certificats TLS <span class="tag-new">cloud</span></li>
+          <li>Scan Checkov de tout le code IaC en CI</li>
+          <li>Bootstrap runbook : recréer l'intégralité de la plateforme en moins d'une heure</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase sec">
+      <div class="phase-num">PHASE 02 — Semaines 2–3</div>
+      <div class="phase-title">Supply Chain Security & Hardening — SLSA v1.1</div>
+      <div class="phase-body">
+        Sécuriser la chaîne de build avant tout déploiement. En 2026, les attestations de provenance sont attendues en industrie réglementée.
+        <ul class="task-list">
+          <li>Pipeline CI avec Trivy — prioriser par EPSS score, pas seulement CVSS <span class="tag-new">2026</span></li>
+          <li>Bloquer tout CVE CRITICAL avec EPSS > 0.1 non justifiée</li>
+          <li>Signature d'image Cosign + génération d'attestations de provenance SLSA Build Level 2 <span class="tag-upd">UPD</span></li>
+          <li>SBOM CycloneDX généré par Syft à chaque build et archivé dans le registry OCI</li>
+          <li>Vérification de signature à l'admission via Kyverno policy (blocage si signature absente)</li>
+          <li>Kubescape 4.0 : scan posture CIS Benchmark + NSA/CISA, corriger tous les findings HIGH <span class="tag-new">2026</span></li>
+          <li>ValidatingAdmissionPolicy Kubernetes native pour les règles simples (feature GA en 1.30+) <span class="tag-new">2026</span></li>
+          <li>External Secrets Operator + Vault : aucun secret dans Git, zéro SealedSecret statique</li>
+          <li>NetworkPolicy Cilium L7 : deny-all par défaut, autoriser uniquement les flux DNS/HTTP documentés</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-num">PHASE 03 — Semaines 3–4</div>
+      <div class="phase-title">Application NovaPay — Déploiement & Service Mesh Ambient</div>
+      <div class="phase-body">
+        Déployer les micro-services avec Istio Ambient Mesh. Justifier le choix ambient vs sidecar dans un ADR.
+        <ul class="task-list">
+          <li>Packager chaque service en Helm chart avec values staging/prod (Kustomize pour les overlays env)</li>
+          <li>Activer Istio Ambient sur les namespaces prod : ztunnel L4 + waypoint proxy L7 sur payment-svc <span class="tag-upd">2026</span></li>
+          <li>Rédiger l'ADR ambient vs sidecar : performance, ressources, observabilité, trade-offs <span class="tag-new">2026</span></li>
+          <li>Configurer HTTPRoutes et GRPCRoutes via Gateway API (plus d'annotations Ingress) <span class="tag-upd">2026</span></li>
+          <li>Canary deployment via Argo Rollouts + Gateway API HTTPRoute (weight-based, 10% → 50% → 100%)</li>
+          <li>Sidecar containers natifs Kubernetes 1.28+ pour init patterns (logger, config-reloader) <span class="tag-new">2026</span></li>
+          <li>HPA + KEDA sur les services critiques (métriques custom RPS via OTEL)</li>
+          <li>PodDisruptionBudgets, topologySpreadConstraints, liveness/readiness/startup probes obligatoires</li>
+          <li>TLS automatique via cert-manager + Let's Encrypt ou CA interne</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase obs">
+      <div class="phase-num">PHASE 04 — Semaines 4–5</div>
+      <div class="phase-title">Observabilité Unifiée — OTEL + Grafana Alloy + SLO</div>
+      <div class="phase-body">
+        Pipeline d'observabilité unifié OpenTelemetry. Grafana Alloy remplace Promtail + Grafana Agent.
+        <ul class="task-list">
+          <li>Déployer Grafana Alloy en DaemonSet : collecte métriques (Prometheus scrape), logs et traces en un seul agent <span class="tag-new">2026</span></li>
+          <li>Instrumenter les services NovaPay avec le SDK OpenTelemetry (OTLP vers Alloy → Mimir/Loki/Tempo)</li>
+          <li>Configurer Istio Ambient pour exporter les métriques L7 via waypoint proxies en OTLP <span class="tag-new">2026</span></li>
+          <li>Profiling continu avec Pyroscope ou Grafana Profiling (Alloy intégration native) <span class="tag-new">2026</span></li>
+          <li>Dashboard Grafana : SLI/SLO payment-svc (latency p99, error rate, saturation)</li>
+          <li>8+ alertes Alertmanager pertinentes avec runbook lié dans chaque annotation</li>
+          <li>SLO défini et mesuré : 99.9% dispo, p99 latency < 300ms (budget d'erreur calculé)</li>
+          <li>Dashboard on-call one-pager : 90% des incidents diagnosticables en 1 écran</li>
+          <li>Corréler log → trace → métrique via Grafana Explore (exemplars)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase sec">
+      <div class="phase-num">PHASE 05 — Semaine 5–6</div>
+      <div class="phase-title">Sécurité Runtime, eBPF & Threat Modelling</div>
+      <div class="phase-body">
+        Détection et réponse en temps réel. Cilium eBPF comme source de vérité réseau.
+        <ul class="task-list">
+          <li>Falco avec règles custom (shell dans pod payment, accès /proc/*/mem, exfiltration DNS)</li>
+          <li>Cilium Tetragon pour la détection eBPF bas niveau (syscall audit, file access) <span class="tag-new">2026</span></li>
+          <li>Router alertes Falco + Tetragon → Alertmanager → Slack avec enrichissement context pod</li>
+          <li>Audit Logs Kubernetes exportés vers Loki, requêtes LogQL pour détecter privilege escalation</li>
+          <li>Kubescape 4.0 runtime : scan posture continu, pas juste au deploy <span class="tag-new">2026</span></li>
+          <li>Simuler 3 scénarios d'attaque et démontrer la détection : container escape simulé, secret theft via env, lateral movement</li>
+          <li>Threat modelling STRIDE de l'architecture NovaPay (documenter surface d'attaque résiduelle)</li>
+          <li>RBAC minimal : least privilege sur tous les ServiceAccounts, pas de ClusterAdmin inutile</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase auto">
+      <div class="phase-num">PHASE 06 — Semaine 6–7</div>
+      <div class="phase-title">Chaos Engineering & Résilience</div>
+      <div class="phase-body">
+        Prouver que la plateforme tient sous la pression et respecte les SLO pendant les pannes.
+        <ul class="task-list">
+          <li>5 GameDays documentés avant exécution (hypothèse, SLO cible, critères de succès)</li>
+          <li>Générer une charge réaliste depuis les PC légers (k6 ou Locust) sur payment-svc pendant les tests <span class="tag-new">infra</span></li>
+          <li>Chaos Mesh ou LitmusChaos : pod kill, network delay/partition, node drain, disk fill</li>
+          <li>Tuer une VM control-plane prod et prouver que le quorum etcd tient (HA validé) <span class="tag-new">infra</span></li>
+          <li>Valider que les SLO restent respectés pendant chaque test (budget d'erreur non dépassé)</li>
+          <li>Tester le canary Argo Rollouts : déclencher un rollback automatique si error rate > 5%</li>
+          <li>Velero vers le bucket cloud S3/GCS : backup namespace, suppression, restauration complète prouvée <span class="tag-new">cloud</span></li>
+          <li>Tester la résilience Vault (5 min d'indisponibilité) : que deviennent les pods qui démarrent ?</li>
+          <li>Chaos Report : RCA structuré pour chaque test, corrective actions documentées</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase plat">
+      <div class="phase-num">PHASE 07 — Semaine 7</div>
+      <div class="phase-title">Platform Engineering — Internal Developer Portal</div>
+      <div class="phase-body">
+        En 2026, 80% des grandes orgs ont une équipe Platform Engineering. L'IDP est le produit qu'elle livre aux devs.
+        <ul class="task-list">
+          <li>Déployer Backstage (IDP) dans le cluster via Helm <span class="tag-new">2026</span></li>
+          <li>Cataloguer les 3 services NovaPay : owner, tier, SLO, runbook, repo, dashboard Grafana</li>
+          <li>Créer un Software Template Backstage : "Je veux un nouveau microservice" → génère repo, pipeline CI, chart Helm, namespace k8s, entry Backstage <span class="tag-new">2026</span></li>
+          <li>TechDocs : documentation des services rendue dans Backstage depuis les repos Git</li>
+          <li>Score de maturité par composant (SLO défini ? observabilité ? runbook ? scan sécurité ?)</li>
+          <li>DORA Metrics visibles dans Backstage : deployment frequency, lead time, MTTR, change failure rate <span class="tag-new">2026</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase auto">
+      <div class="phase-num">PHASE 08 — Semaine 7–8</div>
+      <div class="phase-title">FinOps & Portabilité Hybride Cloud</div>
+      <div class="phase-body">
+        Démontrer que la plateforme est portable et que vous savez arbitrer le coût — le raisonnement clé d'un platform engineer en 2026.
+        <ul class="task-list">
+          <li>Provisionner un petit cluster managé (EKS/GKE) via Terraform, allumé quelques jours seulement <span class="tag-new">cloud</span></li>
+          <li>Déployer la même app via le même ArgoCD pour prouver la portabilité GitOps on-prem ↔ cloud <span class="tag-new">cloud</span></li>
+          <li>Documenter ce qui a dû changer (StorageClass, LoadBalancer, IAM) et ce qui est resté identique</li>
+          <li>Mettre en place un suivi de coût : OpenCost ou Kubecost sur le cluster pour la visibilité par namespace <span class="tag-new">FinOps</span></li>
+          <li>Rapport FinOps : coût réel cloud du mois, arbitrage on-prem (capacité fixe payée) vs cloud (élastique) <span class="tag-new">FinOps</span></li>
+          <li>Rightsizing : Goldilocks / VPA en mode recommendation, identifier les requests/limits sur/sous-dimensionnés</li>
+          <li>Détruire le cluster managé après la démo et prouver le coût maîtrisé (facturation à l'usage)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase doc">
+      <div class="phase-num">PHASE 09 — Semaine 8</div>
+      <div class="phase-title">Documentation, ADRs & Soutenance</div>
+      <div class="phase-body">
+        Une plateforme non documentée n'existe pas. Le jury s'attend à pouvoir opérer le système sans vous.
+        <ul class="task-list">
+          <li>7+ Architecture Decision Records : staging non-HA assumé, arbitre etcd sur PC léger, Ambient vs sidecar, Cilium CNI, Alloy vs OTel Collector, SLSA Level, arbitrage on-prem vs cloud <span class="tag-new">infra</span></li>
+          <li>Runbooks opérationnels : control-plane KO, perte d'un serveur physique, Vault indisponible, node NotReady, canary bloqué</li>
+          <li>Rapport de sécurité : modèle de menace STRIDE, findings Kubescape résolus, surface résiduelle</li>
+          <li>Présentation 30 min : architecture → live demo déploiement GitOps d'un hotfix → chaos demo (tuer une VM CP)</li>
+          <li>Chaque membre du groupe doit pouvoir défendre n'importe quel composant face au jury</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- DELIVERABLES -->
+  <div class="sl">Livrables</div>
+  <h2>Ce que vous rendez</h2>
+  <div class="del-grid">
+    <div class="del-item">
+      <div class="del-tag">Code / IaC</div>
+      <div class="del-title">Repo GitOps structuré, Terraform, Ansible, Charts Helm, ApplicationSets ArgoCD</div>
+    </div>
+    <div class="del-item">
+      <div class="del-tag">CI/CD</div>
+      <div class="del-title">Pipelines avec Trivy/EPSS, Cosign, SLSA attestations, Checkov, promotion automatisée</div>
+    </div>
+    <div class="del-item">
+      <div class="del-tag">Sécurité</div>
+      <div class="del-title">Rapport Kubescape, policies Kyverno, SBOM, règles Falco/Tetragon, modèle STRIDE</div>
+    </div>
+    <div class="del-item">
+      <div class="del-tag">Observabilité</div>
+      <div class="del-title">Config Alloy, dashboards Grafana JSON, alertes, SLO documentés et mesurés</div>
+    </div>
+    <div class="del-item">
+      <div class="del-tag">Chaos Report</div>
+      <div class="del-title">5 GameDays : hypothèse, résultat, SLO tracking, RCA, corrective actions</div>
+    </div>
+    <div class="del-item">
+      <div class="del-tag">IDP</div>
+      <div class="del-title">Backstage déployé, catalogue services, Software Template, TechDocs, DORA metrics</div>
+    </div>
+    <div class="del-item">
+      <div class="del-tag">FinOps / Hybride</div>
+      <div class="del-title">Rapport de coût cloud, preuve de portabilité GitOps on-prem ↔ managé, rightsizing</div>
+    </div>
+    <div class="del-item">
+      <div class="del-tag">ADRs + Runbooks</div>
+      <div class="del-title">7+ ADRs justifiés, 5+ runbooks opérationnels couvrant les incidents critiques</div>
+    </div>
+    <div class="del-item">
+      <div class="del-tag">Soutenance</div>
+      <div class="del-title">Démo live GitOps + chaos + défense technique 30 min, tout membre interrogeable</div>
+    </div>
+  </div>
+
+  <!-- EVAL -->
+  <div class="sl">Évaluation</div>
+  <h2>Grille de notation</h2>
+  <table class="eval-table">
+    <thead>
+      <tr>
+        <th>Critère</th>
+        <th>Points</th>
+        <th>Ce que le jury cherche</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Infrastructure HA & GitOps Multi-Cluster</td>
+        <td class="pts">17 pts</td>
+        <td>Quorum etcd correct, prod HA prouvé, ArgoCD hub seul maître des 2 clusters</td>
+      </tr>
+      <tr>
+        <td>Supply Chain Security (SLSA, Cosign, SBOM, EPSS)</td>
+        <td class="pts">18 pts</td>
+        <td>Attestations vérifiables, priorisation CVE par EPSS, pipeline bloquant</td>
+      </tr>
+      <tr>
+        <td>Sécurité cluster & runtime (Kubescape, Falco, Tetragon, RBAC)</td>
+        <td class="pts">18 pts</td>
+        <td>Hardening prouvé, attaques simulées détectées, posture continue</td>
+      </tr>
+      <tr>
+        <td>Service Mesh Ambient & Résilience (Istio, Gateway API, Chaos)</td>
+        <td class="pts">16 pts</td>
+        <td>ADR ambient justifié, mTLS prouvé, SLO respecté pendant le chaos</td>
+      </tr>
+      <tr>
+        <td>Observabilité OTEL unifiée & SLO</td>
+        <td class="pts">12 pts</td>
+        <td>Alloy configuré, corrélation log/trace/métrique, budget d'erreur calculé</td>
+      </tr>
+      <tr>
+        <td>FinOps & Portabilité Hybride Cloud</td>
+        <td class="pts">7 pts</td>
+        <td>Portabilité GitOps prouvée, coût suivi et arbitrage on-prem/cloud documenté</td>
+      </tr>
+      <tr>
+        <td>Platform Engineering (Backstage IDP, DORA metrics)</td>
+        <td class="pts">6 pts</td>
+        <td>Un dev fictif peut onboarder un service sans aide</td>
+      </tr>
+      <tr>
+        <td>Documentation, ADRs & Runbooks</td>
+        <td class="pts">6 pts</td>
+        <td>Peut-on opérer la plateforme sans les auteurs ?</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <hr class="divider">
+
+  <!-- BONUS -->
+  <div class="sl">Bonus</div>
+  <h2>Pour un projet exceptionnel</h2>
+  <div class="bonus-block">
+    <p style="font-size:0.87rem;color:var(--text-dim)">Ces éléments distinguent un projet de niveau ingénieur senior :</p>
+    <ul>
+      <li>SLSA Build Level 3 complet (build hermétique, provenance signée par la plateforme de CI, pas l'utilisateur)</li>
+      <li>Promotion automatique staging → prod : un test vert sur staging déclenche le sync prod via ArgoCD</li>
+      <li>Cilium Tetragon policies de sécurité eBPF (deny via LSM hook, pas juste alert)</li>
+      <li>DORA metrics collectés automatiquement depuis les events ArgoCD et CI (pas de saisie manuelle)</li>
+      <li>Karpenter sur le cluster cloud managé pour démontrer l'autoscaling élastique vs capacité fixe on-prem</li>
+      <li>Argo Rollouts analysis templates : rollback automatique basé sur métriques OTEL custom</li>
+      <li>Conftest + OPA pour valider les manifests Kubernetes avant merge (policy in CI, pas qu'en admission)</li>
+    </ul>
+  </div>
+
+  <!-- RÈGLES -->
+  <div class="sl">Règles non négociables</div>
+  <h2>Contraintes absolues</h2>
+  <div class="rules">
+    <div class="rule">
+      <div class="rule-icon">🚫</div>
+      <div>
+        <div class="rule-title">Zéro secret dans Git</div>
+        <div class="rule-desc">Tout secret détecté dans un commit (y compris dans l'historique) = pénalité immédiate. ESO + Vault obligatoires.</div>
+      </div>
+    </div>
+    <div class="rule">
+      <div class="rule-icon">🚫</div>
+      <div>
+        <div class="rule-title">Zéro kubectl apply manuel en prod</div>
+        <div class="rule-desc">ArgoCD est le seul acteur autorisé à modifier l'état du cluster de prod. Toute déviation visible dans ArgoCD doit être auto-corrigée (sync policy).</div>
+      </div>
+    </div>
+    <div class="rule">
+      <div class="rule-icon">🚫</div>
+      <div>
+        <div class="rule-title">Zéro image sans digest</div>
+        <div class="rule-desc">Toutes les images référencées par leur SHA256 digest (pas de tag mutable, pas de :latest). Kyverno bloque toute image sans digest.</div>
+      </div>
+    </div>
+    <div class="rule">
+      <div class="rule-icon">🚫</div>
+      <div>
+        <div class="rule-title">Zéro Ingress Controller</div>
+        <div class="rule-desc">Gateway API Kubernetes uniquement. Nginx/Traefik Ingress = pratique legacy en 2026. Justifiez tout écart dans un ADR.</div>
+      </div>
+    </div>
+    <div class="rule">
+      <div class="rule-icon">✅</div>
+      <div>
+        <div class="rule-title">Tout doit être démontrable en live</div>
+        <div class="rule-desc">Le jury peut demander une démo de n'importe quelle partie à la soutenance : déploiement GitOps, rollback canary, détection Falco, restauration Velero.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</main>
+
+<footer>
+  <div class="container">
+    Projet Master DevSecOps 2026 — NovaPay Platform Engineering Challenge &nbsp;·&nbsp; Kubernetes 1.35/1.36 &nbsp;·&nbsp; 8 semaines &nbsp;·&nbsp; 100 points
+  </div>
+</footer>
+
 </body>
 </html>
