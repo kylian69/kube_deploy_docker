@@ -1,3 +1,4 @@
+# .github/workflows/docker-build.yml
 name: Build & Push Docker Image
 
 on:
@@ -27,3 +28,16 @@ jobs:
           tags: |
             kyliangllt/mon-site:latest
             kyliangllt/mon-site:${{ github.sha }}
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
+
+      - name: Rolling update
+        run: |
+          kubectl rollout restart deployment mon-site-deployment -n kylian-exo-bonus1
+          kubectl rollout status deployment mon-site-deployment -n kylian-exo-bonus1
