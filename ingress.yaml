@@ -1,0 +1,19 @@
+# ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mon-site-ingress
+  namespace: kylian-exo-bonus1
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: kylian-exo-bonus1.dev-1.isik3s.tancou.fr
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mon-site-service
+                port:
+                  number: 80

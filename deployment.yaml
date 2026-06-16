@@ -1,0 +1,27 @@
+# deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mon-site-deployment
+  namespace: kylian-exo-bonus1
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: mon-site
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: mon-site
+    spec:
+      containers:
+        - name: mon-site
+          image: kyliangllt/mon-site:latest
+          ports:
+            - containerPort: 80
+          imagePullPolicy: Always
